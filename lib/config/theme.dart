@@ -21,11 +21,23 @@ final ThemeData appTheme = ThemeData(
 
   // Tema teks umum
   textTheme: const TextTheme(
-    displayLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-    titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+    displayLarge: TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.w600,
+      color: AppColors.textPrimary,
+    ),
+    titleLarge: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: AppColors.textPrimary,
+    ),
     bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
     bodyMedium: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-    labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+    labelLarge: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    ),
   ),
 
   // AppBar
@@ -41,10 +53,7 @@ final ThemeData appTheme = ThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 16,
-      ),
+      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
@@ -57,10 +66,7 @@ final ThemeData appTheme = ThemeData(
     style: OutlinedButton.styleFrom(
       side: const BorderSide(color: AppColors.primary, width: 1.5),
       foregroundColor: AppColors.primary,
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w500,
-        fontSize: 16,
-      ),
+      textStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
@@ -87,12 +93,12 @@ final ThemeData appTheme = ThemeData(
 
   // Kartu (card)
   cardTheme: const CardThemeData(
-  color: Colors.white,
-  elevation: 1,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(12)),
+    color: Colors.white,
+    elevation: 1,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+    ),
   ),
-),
 
   // Bottom Navigation
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
