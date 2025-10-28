@@ -85,16 +85,19 @@ class HomePage extends StatelessWidget {
                     context,
                     'assets/icons/icon-pendaftaran.png',
                     'Pendaftaran',
+                    '/pendaftaran',
                   ),
                   _serviceTile(
                     context,
                     'assets/icons/icon-hasil.png',
                     'Hasil\nPemeriksaan',
+                    '/cekhasil',
                   ),
                   _serviceTile(
                     context,
                     'assets/icons/icon-riwayat.png',
                     'Riwayat\nPemeriksaan',
+                    '/riwayat',
                   ),
                 ],
               ),
@@ -168,33 +171,48 @@ class HomePage extends StatelessWidget {
   }
 
   // --- fungsi untuk tile layanan ---
-  Widget _serviceTile(BuildContext context, String iconPath, String label) {
+  Widget _serviceTile(
+    BuildContext context,
+    String iconPath,
+    String label,
+    String routeName,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
 
     return Expanded(
-      child: SizedBox(
-        height: 116,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: cs.secondary.withValues(alpha: .14),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(iconPath, width: 28, height: 28, fit: BoxFit.contain),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: t.bodyMedium?.copyWith(color: cs.onSurface),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, routeName);
+        },
+        child: SizedBox(
+          height: 116,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              color: cs.secondary.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  iconPath,
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: t.bodyMedium?.copyWith(color: cs.onSurface),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),
