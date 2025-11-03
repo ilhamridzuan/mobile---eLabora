@@ -85,8 +85,13 @@ class DoctorHomePage extends StatelessWidget {
                   _ServiceTile(
                     icon: Icons.biotech_rounded,
                     label: 'Hasil\nPemeriksaan',
+                    routeName: '/cek_hasil',
                   ),
-                  _ServiceTile(icon: Icons.view_list_rounded, label: 'Pasien'),
+                  _ServiceTile(
+                    icon: Icons.view_list_rounded,
+                    label: 'Pasien',
+                    routeName: '/data_pasien',
+                  ),
                 ],
               ),
 
@@ -263,8 +268,11 @@ class DoctorHomePage extends StatelessWidget {
             label: 'Akun',
           ),
         ],
-        onTap: (index) {
-          // nanti bisa diisi navigasi di sini
+        onTap: (value) {
+          Navigator.pushReplacementNamed(
+            context,
+            ['/doctor_home', '/pencarian'][value],
+          );
         },
       ),
     );
@@ -274,8 +282,13 @@ class DoctorHomePage extends StatelessWidget {
 class _ServiceTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String routeName;
 
-  const _ServiceTile({required this.icon, required this.label});
+  const _ServiceTile({
+    required this.icon,
+    required this.label,
+    required this.routeName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +297,9 @@ class _ServiceTile extends StatelessWidget {
 
     return Expanded(
       child: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          Navigator.pushNamed(context, routeName);
+        },
         child: Container(
           height: 112,
           margin: const EdgeInsets.symmetric(horizontal: 4),
