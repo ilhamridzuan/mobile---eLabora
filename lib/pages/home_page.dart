@@ -91,7 +91,7 @@ class HomePage extends StatelessWidget {
                     context,
                     'assets/icons/icon-hasil.png',
                     'Hasil\nPemeriksaan',
-                    '/cekhasil',
+                    '/cek_hasil',
                   ),
                   _serviceTile(
                     context,

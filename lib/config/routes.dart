@@ -6,6 +6,7 @@ import 'package:elabora_app/pages/home_page.dart';
 import 'package:elabora_app/pages/riwayat_page.dart';
 import '../pages/landing_page.dart';
 import '../pages/login_page.dart';
+import '../pages/cek_hasil_page.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/': (context) => const LandingPage(),
@@ -15,4 +16,5 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/pendaftaran': (context) => const PendaftaranPage(),
   '/antrian': (context) => const AntrianPage(),
   '/detail_antrian': (context) => const DetailAntrian(),
+  '/cek_hasil': (context) => const CekHasilPage(),
 };
