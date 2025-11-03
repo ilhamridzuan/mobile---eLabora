@@ -114,14 +114,18 @@ class _CekHasilPageState extends State<CekHasilPage> {
                     leading: CircleAvatar(
                       radius: 24,
                       backgroundColor: colors.secondary.withOpacity(0.15),
-                      child: Icon(item['icon'], color: colors.primary, size: 26),
+                      child: Icon(
+                        item['icon'],
+                        color: colors.primary,
+                        size: 26,
+                      ),
                     ),
                     title: Text(
                       item['judul'],
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colors.onSurface,
-                          ),
+                        fontWeight: FontWeight.w600,
+                        color: colors.onSurface,
+                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4),
@@ -130,8 +134,10 @@ class _CekHasilPageState extends State<CekHasilPage> {
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
-                    trailing: Icon(Icons.chevron_right_rounded,
-                        color: colors.outline),
+                    trailing: Icon(
+                      Icons.chevron_right_rounded,
+                      color: colors.outline,
+                    ),
                     onTap: () {
                       // nanti diarahkan ke halaman detail hasil
                     },

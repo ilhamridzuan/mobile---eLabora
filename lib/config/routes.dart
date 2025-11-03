@@ -1,3 +1,4 @@
+import 'package:elabora_app/pages/akun.dart';
 import 'package:elabora_app/pages/antrian.dart';
 import 'package:elabora_app/pages/detail_antrian.dart';
 import 'package:elabora_app/pages/doctor_home_page.dart';
@@ -17,6 +18,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/riwayat': (context) => const RiwayatPage(),
   '/pendaftaran': (context) => const PendaftaranPage(),
   '/antrian': (context) => const AntrianPage(),
-  '/detail_antrian': (context) => const DetailAntrian(),
+  '/detail_antrian': (context) => const DetailAntrianPage(),
   '/cek_hasil': (context) => const CekHasilPage(),
+  '/akun': (context) => const AkunPage(),
 };
