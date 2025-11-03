@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -25,6 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+
+    // role dikirim dari LandingPage melalui arguments ('Pasien' / 'Dokter')
     final role =
         (ModalRoute.of(context)?.settings.arguments as String?) ?? 'Pasien';
 
@@ -103,31 +104,24 @@ class _LoginPageState extends State<LoginPage> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/home');
+                          if (_formKey.currentState?.validate() != true) return;
+
+                          FocusScope.of(context).unfocus();
+
+                          if (role == 'Dokter') {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/doctor_home',
+                            );
+                          } else {
+                            Navigator.pushReplacementNamed(context, '/home');
+                          }
                         },
                         child: const Text('Masuk'),
                       ),
                     ),
 
                     const SizedBox(height: 10),
-                    Center(
-                      child: RichText(
-                        text: TextSpan(
-                          style: t.bodyMedium,
-                          children: [
-                            const TextSpan(text: 'Tidak punya akun? '),
-                            TextSpan(
-                              text: 'Daftar sekarang',
-                              style: TextStyle(
-                                color: cs.primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              recognizer: TapGestureRecognizer()..onTap = () {},
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
