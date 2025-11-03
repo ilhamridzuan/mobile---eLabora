@@ -152,6 +152,12 @@ class HomePage extends StatelessWidget {
         showUnselectedLabels: true,
         selectedItemColor: cs.primary,
         unselectedItemColor: cs.onSurface.withValues(alpha: .6),
+        onTap: (value) {
+          Navigator.pushReplacementNamed(
+            context,
+            ['/home', '/antrian', '/akun'][value],
+          );
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),

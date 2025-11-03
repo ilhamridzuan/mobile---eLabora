@@ -100,10 +100,16 @@ class _AntrianPageState extends State<AntrianPage> {
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 18,
-                    color: color.onSurfaceVariant,
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/detail_antrian');
+                    },
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 18,
+                      color: color.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -131,7 +137,7 @@ class _AntrianPageState extends State<AntrianPage> {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 22),
               margin: const EdgeInsets.only(bottom: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,18 +152,18 @@ class _AntrianPageState extends State<AntrianPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        '20',
-                        style: text.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: color.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
                       Icon(
                         Icons.groups_rounded,
                         color: color.primary,
-                        size: 22,
+                        size: 40,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '20',
+                        style: text.displaySmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: color.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -178,7 +184,7 @@ class _AntrianPageState extends State<AntrianPage> {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 22),
               margin: const EdgeInsets.only(bottom: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -196,12 +202,11 @@ class _AntrianPageState extends State<AntrianPage> {
                       Text(
                         '013',
                         style: text.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w900,
                           color: color.primary,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const SizedBox(width: 22, height: 22),
                     ],
                   ),
                 ],
@@ -221,7 +226,7 @@ class _AntrianPageState extends State<AntrianPage> {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -235,18 +240,18 @@ class _AntrianPageState extends State<AntrianPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(
+                        Icons.groups_rounded,
+                        color: color.primary,
+                        size: 40,
+                      ),
+                      const SizedBox(width: 10),
                       Text(
                         '15',
                         style: text.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w900,
                           color: color.primary,
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.groups_2_rounded,
-                        color: color.primary,
-                        size: 22,
                       ),
                     ],
                   ),
@@ -261,20 +266,26 @@ class _AntrianPageState extends State<AntrianPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         selectedItemColor: color.primary,
-        unselectedItemColor: color.onSurfaceVariant,
+        unselectedItemColor: color.onSurface.withValues(alpha: 0.6),
         backgroundColor: color.surface,
         showUnselectedLabels: true,
+        onTap: (value) {
+          Navigator.pushReplacementNamed(
+            context,
+            ['/home', '/antrian', '/akun'][value],
+          );
+        },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
+            icon: Icon(Icons.home_rounded),
             label: 'Beranda',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people_alt_outlined),
+            icon: Icon(Icons.list_alt_rounded),
             label: 'Antrian',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
+            icon: Icon(Icons.person_rounded),
             label: 'Akun',
           ),
         ],
