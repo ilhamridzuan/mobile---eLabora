@@ -87,7 +87,7 @@ class LandingPage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => _goLogin(context, 'Pasien'),
-                      child: const Text('Login sebagai Pasien'),
+                      child: const Text('Masuk sebagai Pasien'),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -95,7 +95,7 @@ class LandingPage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => _goLogin(context, 'Dokter'),
-                      child: const Text('Login sebagai Dokter'),
+                      child: const Text('Masuk sebagai Dokter'),
                     ),
                   ),
 
