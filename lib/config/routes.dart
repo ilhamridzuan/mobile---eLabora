@@ -8,13 +8,18 @@ import 'package:elabora_app/pages/pendaftaran.dart';
 import 'package:flutter/material.dart';
 import 'package:elabora_app/pages/home_page.dart';
 import 'package:elabora_app/pages/riwayat_page.dart';
+
 import '../pages/landing_page.dart';
 import '../pages/login_page.dart';
 import '../pages/cek_hasil_page.dart';
+import '../pages/register_patient_page.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/': (context) => const LandingPage(),
   '/login': (context) => const LoginPage(),
+
+  '/register': (context) => const RegisterPatientPage(),
+
   '/home': (context) => const HomePage(),
   '/doctor_home': (context) => const DoctorHomePage(),
   '/riwayat': (context) => const RiwayatPage(),
