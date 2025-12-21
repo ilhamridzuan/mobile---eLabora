@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../data/api_client.dart';
+import '../data/auth_api.dart';
+import '../data/token_storage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -8,125 +11,91 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
-  final _pass = TextEditingController();
-  bool _obscure = true;
+  final _username = TextEditingController();
+  final _password = TextEditingController();
+  bool _loading = false;
+
+  late final AuthApi _authApi;
+
+  @override
+  void initState() {
+    super.initState();
+    final client = ApiClient();
+    final storage = TokenStorage();
+    _authApi = AuthApi(client, storage);
+  }
 
   @override
   void dispose() {
-    _email.dispose();
-    _pass.dispose();
+    _username.dispose();
+    _password.dispose();
     super.dispose();
+  }
+
+  Future<void> _doLogin() async {
+    if (_loading) return;
+
+    final username = _username.text.trim();
+    final password = _password.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username dan password wajib diisi')),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      await _authApi.login(username: username, password: password);
+      await _authApi.me();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Login sukses')));
+
+      // PINDAH KE DASHBOARD
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
-
-    // role dikirim dari LandingPage melalui arguments ('Pasien' / 'Dokter')
-    final role =
-        (ModalRoute.of(context)?.settings.arguments as String?) ?? 'Pasien';
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Log in')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Masuk sebagai $role', style: t.titleLarge),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Silahkan masukkan detail akun anda dibawah ini',
-                      style: t.bodyMedium,
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(hintText: 'Email'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Email wajib diisi';
-                        }
-                        final ok = RegExp(
-                          r'^[^@]+@[^@]+\.[^@]+',
-                        ).hasMatch(v.trim());
-                        return ok ? null : 'Format email tidak valid';
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _pass,
-                      obscureText: _obscure,
-                      decoration: InputDecoration(
-                        hintText: 'Kata sandi',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure
-                                ? Icons.visibility_off_rounded
-                                : Icons.visibility_rounded,
-                          ),
-                          onPressed: () => setState(() => _obscure = !_obscure),
-                        ),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) {
-                          return 'Kata sandi wajib diisi';
-                        }
-                        if (v.length < 6) return 'Minimal 6 karakter';
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Lupa kata sandi?',
-                        style: t.bodyMedium?.copyWith(color: cs.primary),
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState?.validate() != true) return;
-
-                          FocusScope.of(context).unfocus();
-
-                          if (role == 'Dokter') {
-                            Navigator.pushReplacementNamed(
-                              context,
-                              '/doctor_home',
-                            );
-                          } else {
-                            Navigator.pushReplacementNamed(context, '/home');
-                          }
-                        },
-                        child: const Text('Masuk'),
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-                  ],
-                ),
+      appBar: AppBar(title: const Text('Login')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: _username,
+              decoration: const InputDecoration(labelText: 'Username'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _password,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'Password'),
+              onSubmitted: (_) => _doLogin(),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _loading ? null : _doLogin,
+                child: Text(_loading ? 'Loading...' : 'Login'),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
