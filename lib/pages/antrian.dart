@@ -262,7 +262,7 @@ class _AntrianPageState extends State<AntrianPage> {
         ),
       ),
 
-      // Button Navigasi Bawah
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         selectedItemColor: color.primary,

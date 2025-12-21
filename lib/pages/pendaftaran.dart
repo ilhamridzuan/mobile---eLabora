@@ -108,7 +108,7 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
               ),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                value: _jenisKelamin,
+                initialValue: _jenisKelamin,
                 decoration: const InputDecoration(
                   hintText: 'Pilih jenis kelamin',
                 ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:elabora_app/utils/constants.dart';
 
-class DetailAntrian extends StatelessWidget {
-  const DetailAntrian({super.key});
+class DetailAntrianPage extends StatelessWidget {
+  const DetailAntrianPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,6 @@ class DetailAntrian extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // === Kartu Nomor Antrian Saat Ini ===
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -58,10 +57,7 @@ class DetailAntrian extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
-
-            // === Kartu Nomor Antrian Saya ===
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -88,7 +84,7 @@ class DetailAntrian extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Ilham Ridzuan',
+                    'Prabowo Subianto',
                     style: text.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: color.onSurface,
@@ -96,14 +92,12 @@ class DetailAntrian extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '05 Juni 2025, 12.30 WIB',
+                    'Kamis, 30 Oktober 2025, 12.30 WIB',
                     style: text.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
                   Text(
                     'Nomor Antrian',
                     style: text.titleLarge?.copyWith(
@@ -120,9 +114,7 @@ class DetailAntrian extends StatelessWidget {
                       fontSize: 56,
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -170,9 +162,7 @@ class DetailAntrian extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 24),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -211,9 +201,7 @@ class DetailAntrian extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             Text(
               'Silahkan datang ke ruangan laboratorium 15 menit sebelum giliran antrian anda.',
               textAlign: TextAlign.center,
