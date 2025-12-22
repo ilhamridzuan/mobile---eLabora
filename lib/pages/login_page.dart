@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     final client = ApiClient();
     final storage = TokenStorage();
-    _authApi = AuthApi(client, storage);
+    _authApi = AuthApi(client);
   }
 
   @override
@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_loading) return;
 
     final username = _username.text.trim();
-    final password = _password.text.trim();
+    final password = _password.text;
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -48,21 +48,36 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _loading = true);
 
     try {
-      await _authApi.login(username: username, password: password);
-      await _authApi.me();
+      final result = await _authApi.login(
+        username: username,
+        password: password,
+      );
+
+      final token = result['token'] as String?;
+      final role = result['role'] as String?;
+
+      if (token == null || role == null) {
+        throw Exception('Login gagal: data tidak lengkap');
+      }
+
+      // simpan token
+      final storage = TokenStorage();
+      await storage.saveToken(token);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Login sukses')));
-
-      // PINDAH KE DASHBOARD
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      if (role == 'DOKTER') {
+        Navigator.pushReplacementNamed(context, '/doctor_home');
+      } else if (role == 'PASIEN') {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        throw Exception('Role tidak dikenali');
+      }
     } catch (e) {
       if (!mounted) return;
-      final msg = e.toString().replaceFirst('Exception: ', '');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }

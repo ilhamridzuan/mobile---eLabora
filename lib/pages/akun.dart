@@ -24,7 +24,7 @@ class _AkunPageState extends State<AkunPage> {
     super.initState();
     _client = ApiClient();
     _tokenStorage = TokenStorage();
-    _authApi = AuthApi(_client, _tokenStorage);
+    _authApi = AuthApi(_client);
 
     _futureMe = _authApi.me();
   }
