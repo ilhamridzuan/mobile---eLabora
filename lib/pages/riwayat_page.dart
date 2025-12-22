@@ -26,7 +26,7 @@ class _RiwayatPageState extends State<RiwayatPage> {
   void initState() {
     super.initState();
     _client = ApiClient();
-    _authApi = AuthApi(_client, TokenStorage());
+    _authApi = AuthApi(_client);
     _examsApi = ExamsApi(_client);
     _futureRows = _load();
   }
@@ -76,13 +76,21 @@ class _RiwayatPageState extends State<RiwayatPage> {
             // kategori chip: "Semua" + kategori unik dari API
             final categories = <String>{
               'Semua',
-              ...rows.map((e) => (e['kategori_nama'] ?? '').toString()).where((s) => s.isNotEmpty),
+              ...rows
+                  .map((e) => (e['kategori_nama'] ?? '').toString())
+                  .where((s) => s.isNotEmpty),
             }.toList();
 
             // filter data sesuai chip
             final filtered = selectedCategory == 'Semua'
                 ? rows
-                : rows.where((e) => (e['kategori_nama'] ?? '').toString() == selectedCategory).toList();
+                : rows
+                      .where(
+                        (e) =>
+                            (e['kategori_nama'] ?? '').toString() ==
+                            selectedCategory,
+                      )
+                      .toList();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,15 +105,22 @@ class _RiwayatPageState extends State<RiwayatPage> {
                         child: ChoiceChip(
                           label: Text(cat),
                           selected: isSelected,
-                          onSelected: (_) => setState(() => selectedCategory = cat),
+                          onSelected: (_) =>
+                              setState(() => selectedCategory = cat),
                           selectedColor: Theme.of(context).primaryColor,
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surface,
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.textSecondary,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                           side: BorderSide(
-                            color: AppColors.textSecondary.withValues(alpha: 0.15),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.15,
+                            ),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
@@ -119,7 +134,9 @@ class _RiwayatPageState extends State<RiwayatPage> {
 
                 Expanded(
                   child: filtered.isEmpty
-                      ? const Center(child: Text('Belum ada riwayat pemeriksaan.'))
+                      ? const Center(
+                          child: Text('Belum ada riwayat pemeriksaan.'),
+                        )
                       : RefreshIndicator(
                           onRefresh: () async {
                             setState(() {
@@ -157,7 +174,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
     final tanggal = _formatTanggal(tglRaw);
     final kode = '$noAntrian - $noLab';
 
-    final statusLabel = _mapStatusLabel(statusHasil: statusHasil, statusAntrian: statusAntrian);
+    final statusLabel = _mapStatusLabel(
+      statusHasil: statusHasil,
+      statusAntrian: statusAntrian,
+    );
     final statusColor = _mapStatusColor(statusLabel);
 
     final iconPath = _iconForCategory(jenis);
@@ -203,14 +223,19 @@ class _RiwayatPageState extends State<RiwayatPage> {
               children: [
                 Text(
                   'Pemeriksaan $jenis',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(tanggal, style: Theme.of(context).textTheme.bodyMedium),
                 Text(kode, style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor,
                     borderRadius: BorderRadius.circular(12),
@@ -255,7 +280,10 @@ class _RiwayatPageState extends State<RiwayatPage> {
     }
   }
 
-  String _mapStatusLabel({required String statusHasil, required String statusAntrian}) {
+  String _mapStatusLabel({
+    required String statusHasil,
+    required String statusAntrian,
+  }) {
     // Prioritas: dibatalkan
     if (statusAntrian.toUpperCase() == 'DIBATALKAN') return 'dibatalkan';
 

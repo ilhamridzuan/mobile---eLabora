@@ -23,14 +23,22 @@ class LandingPage extends StatelessWidget {
               Text('Unit Laboratorium RSUD KAJEN', style: t.bodyMedium),
               const SizedBox(height: 18),
 
-              // (opsional) gambar kamu biarkan
               Expanded(
-                child: Center(
-                  child: Text(
-                    'Lakukan pendaftaran pemeriksaan dan lihat hasil pemeriksaan\nLaboratorium RSUD KAJEN dalam satu aplikasi!',
-                    style: t.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/gambar-landingpage.png',
+                      height: 220,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Lakukan pendaftaran pemeriksaan dan lihat hasil pemeriksaan\nLaboratorium RSUD KAJEN dalam satu aplikasi!',
+                      style: t.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
 

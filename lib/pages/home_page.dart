@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _client = ApiClient();
     _tokenStorage = TokenStorage();
-    _authApi = AuthApi(_client, _tokenStorage);
+    _authApi = AuthApi(_client );
 
     _futureMe = _authApi.me();
   }

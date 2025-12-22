@@ -1,15 +1,13 @@
 import 'package:dio/dio.dart';
 import 'api_client.dart';
-import 'token_storage.dart';
 
 class AuthApi {
   final ApiClient _client;
-  final TokenStorage _tokenStorage;
 
-  AuthApi(this._client, this._tokenStorage);
+  AuthApi(this._client);
 
   /// LOGIN
-  Future<String> login({
+  Future<Map<String, dynamic>> login({
     required String username,
     required String password,
   }) async {
@@ -18,14 +16,7 @@ class AuthApi {
         '/auth/login',
         data: {'username': username, 'password': password},
       );
-
-      final token = res.data['token'];
-      if (token == null || token.toString().isEmpty) {
-        throw Exception('Token tidak ditemukan dari server');
-      }
-
-      await _tokenStorage.saveToken(token);
-      return token;
+      return Map<String, dynamic>.from(res.data);
     } on DioException catch (e) {
       final msg =
           e.response?.data?['message']?.toString() ??
@@ -35,7 +26,6 @@ class AuthApi {
     }
   }
 
-  /// GET USER LOGIN
   Future<Map<String, dynamic>> me() async {
     try {
       final res = await _client.dio.get('/auth/me');
