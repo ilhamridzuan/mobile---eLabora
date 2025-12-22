@@ -3,6 +3,7 @@ import 'package:elabora_app/pages/antrian.dart';
 import 'package:elabora_app/pages/detail_antrian.dart';
 import 'package:elabora_app/pages/doctor_home_page.dart';
 import 'package:elabora_app/pages/cari_pasien_page.dart';
+import 'package:elabora_app/pages/hasil_detail_page.dart';
 import 'package:elabora_app/pages/pencarian_page.dart';
 import 'package:elabora_app/pages/pendaftaran.dart';
 import 'package:flutter/material.dart';
@@ -30,4 +31,10 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/akun': (context) => const AkunPage(),
   '/data_pasien': (context) => const CariPasienPage(),
   '/pencarian': (context) => const PencarianPage(),
+  '/exam_detail': (context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final id = args['id'] as int;
+    return HasilDetailPage(id: id);
+  },
 };

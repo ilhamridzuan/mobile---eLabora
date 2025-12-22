@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
+import '../utils/date_id.dart';
+import '../data/api_client.dart';
+import '../data/auth_api.dart';
+import '../data/exams_api.dart';
 
-/// cek hasil page — halaman daftar hasil pemeriksaan
 class CekHasilPage extends StatefulWidget {
   const CekHasilPage({super.key});
 
@@ -12,322 +15,296 @@ class CekHasilPage extends StatefulWidget {
 class _CekHasilPageState extends State<CekHasilPage> {
   String selectedCategory = 'Semua';
 
-  final List<Map<String, dynamic>> hasilList = [
-    {
-      'kategori': 'Patologi',
-      'judul': 'Pemeriksaan Patologi',
-      'tanggal': 'Kamis, 05 Juni 2025 Pukul 12.30',
-      'kode': '252432123 - 0M7346123',
-    },
-    {
-      'kategori': 'Anatomi',
-      'judul': 'Pemeriksaan Anatomi',
-      'tanggal': 'Kamis, 05 Juni 2025 Pukul 12.30',
-      'kode': '252432123 - 0M7346123',
-    },
-    {
-      'kategori': 'Mikrobiologi',
-      'judul': 'Pemeriksaan Mikrobiologi',
-      'tanggal': 'Kamis, 05 Juni 2025 Pukul 12.30',
-      'kode': '252432123 - 0M7346123',
-    },
-    {
-      'kategori': 'Patologi',
-      'judul': 'Pemeriksaan Patologi',
-      'tanggal': 'Kamis, 05 Juni 2025 Pukul 12.30',
-      'kode': '252432123 - 0M7346123',
-    },
-  ];
+  late final ApiClient _client;
+  late final AuthApi _authApi;
+  late final ExamsApi _examsApi;
 
-  List<String> categories = ['Semua', 'Patologi', 'Anatomi', 'Mikrobiologi'];
+  late Future<List<Map<String, dynamic>>> _futureRows;
+
+  @override
+  void initState() {
+    super.initState();
+    _client = ApiClient();
+    _authApi = AuthApi(_client);
+    _examsApi = ExamsApi(_client);
+    _futureRows = _load();
+  }
+
+  Future<List<Map<String, dynamic>>> _load() async {
+    final me = await _authApi.me();
+    final profil = me['profil'] as Map<String, dynamic>?;
+    if (profil == null || profil['id'] == null) {
+      throw Exception('Profil pasien tidak ditemukan dari /auth/me');
+    }
+
+    final pasienId = profil['id'] as int;
+    final rows = await _examsApi.listByPatient(pasienId);
+
+    // ✅ Filter: hanya hasil tersedia
+    return rows.where((e) {
+      final status = (e['status_hasil'] ?? '').toString().toUpperCase();
+      return status == 'HASIL_TERSEDIA';
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    List<Map<String, dynamic>> filteredList = selectedCategory == 'Semua'
-        ? hasilList
-        : hasilList.where((e) => e['kategori'] == selectedCategory).toList();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hasil Pemeriksaan'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list_rounded),
-            onPressed: () {},
-          ),
-        ],
+        title: const Text('Hasil Pemeriksaan'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Filter kategori
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: categories.map((cat) {
-                final isSelected = cat == selectedCategory;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(cat),
-                    selected: isSelected,
-                    onSelected: (_) {
-                      setState(() {
-                        selectedCategory = cat;
-                      });
-                    },
-                    selectedColor: Theme.of(context).primaryColor,
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    side: BorderSide(
-                      color: AppColors.textSecondary.withValues(alpha: 0.15),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: _futureRows,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return _ErrorState(
+                message: snapshot.error.toString(),
+                onRetry: () {
+                  setState(() {
+                    _futureRows = _load();
+                  });
+                },
+              );
+            }
 
-          const SizedBox(height: 8),
+            final rows = snapshot.data ?? [];
 
-          // List hasil pemeriksaan
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredList.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemBuilder: (context, index) {
-                final item = filteredList[index];
-                String iconPath = '';
-                switch (item['kategori']) {
-                  case 'Patologi':
-                    iconPath = 'assets/icons/icon-patologi.png';
-                    break;
-                  case 'Anatomi':
-                    iconPath = 'assets/icons/icon-anatomi.png';
-                    break;
-                  case 'Mikrobiologi':
-                    iconPath = 'assets/icons/icon-mikrobiologi.png';
-                    break;
-                  default:
-                    iconPath = 'assets/icons/icon-patologi.png';
-                }
+            // kategori chip: "Semua" + kategori unik dari API (yang sudah hasil tersedia)
+            final categories = <String>{
+              'Semua',
+              ...rows
+                  .map((e) => (e['kategori_nama'] ?? '').toString())
+                  .where((s) => s.isNotEmpty),
+            }.toList();
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colors.secondary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Image.asset(
-                        iconPath,
-                        width: 28,
-                        height: 28,
-                        color: colors.primary,
-                      ),
-                    ),
-                    title: Text(
-                      item['judul'],
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        '${item['tanggal']}\n${item['kode']}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.chevron_right_rounded,
-                      color: Colors.grey,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const DetailHasilPage(),
+            // filter data sesuai chip
+            final filtered = selectedCategory == 'Semua'
+                ? rows
+                : rows
+                    .where(
+                      (e) =>
+                          (e['kategori_nama'] ?? '').toString() == selectedCategory,
+                    )
+                    .toList();
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: categories.map((cat) {
+                      final isSelected = cat == selectedCategory;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: ChoiceChip(
+                          label: Text(cat),
+                          selected: isSelected,
+                          onSelected: (_) => setState(() => selectedCategory = cat),
+                          selectedColor: Theme.of(context).primaryColor,
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          side: BorderSide(
+                            color: AppColors.textSecondary.withValues(alpha: 0.15),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
                         ),
                       );
-                    },
+                    }).toList(),
                   ),
-                );
-              },
-            ),
+                ),
+                const SizedBox(height: 16),
+
+                Expanded(
+                  child: filtered.isEmpty
+                      ? const Center(
+                          child: Text('Belum ada hasil pemeriksaan tersedia.'),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () async {
+                            setState(() {
+                              _futureRows = _load();
+                            });
+                            await _futureRows;
+                          },
+                          child: ListView.builder(
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              return _buildClickableItem(filtered[index]);
+                            },
+                          ),
+                        ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClickableItem(Map<String, dynamic> row) {
+    // list endpoint mengembalikan pemeriksaan_id
+    final pemeriksaanId = row['pemeriksaan_id'];
+    if (pemeriksaanId == null) {
+      // fallback kalau data tidak sesuai
+      return _buildCard(row, showChevron: false, onTap: null);
+    }
+
+    return _buildCard(
+      row,
+      showChevron: true,
+      onTap: () {
+        // ✅ Pindah ke detail (pastikan route ini ada)
+        Navigator.pushNamed(
+          context,
+          '/exam_detail',
+          arguments: {'id': pemeriksaanId},
+        );
+      },
+    );
+  }
+
+  Widget _buildCard(
+    Map<String, dynamic> row, {
+    required bool showChevron,
+    required VoidCallback? onTap,
+  }) {
+    final jenis = (row['kategori_nama'] ?? '-').toString();
+    final tglRaw = (row['tgl_pemeriksaan'] ?? '').toString();
+    final noAntrian = row['no_antrian']?.toString() ?? '-';
+    final noLab = row['no_lab']?.toString() ?? '-';
+
+    final tanggal = _formatTanggal(tglRaw);
+    final kode = '$noAntrian - $noLab';
+    final iconPath = _iconForCategory(jenis);
+
+    final card = Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textSecondary.withValues(alpha: 0.15),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-}
-
-/// detail hasil page — halaman detail hasil pemeriksaan
-class DetailHasilPage extends StatelessWidget {
-  const DetailHasilPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final t = Theme.of(context).textTheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hasil Pemeriksaan'),
-        centerTitle: true,
-        backgroundColor: cs.surface,
-        foregroundColor: cs.onSurface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Kategori : Patologi\n'
-              'Dikeluarkan tanggal : 05 Juni 2025 Pukul 12.30\n'
-              'No. Lab : 235321234 - OM1231234',
-              style: t.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-
-            Text(
-              'Preview',
-              style: t.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-
-            ClipRRect(
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: cs.outlineVariant, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Image.asset(
-                  'assets/images/hasil_lab_preview.jpg',
-                  fit: BoxFit.cover,
-                ),
+            ),
+            child: Image.asset(
+              iconPath,
+              width: 28,
+              height: 28,
+              color: Theme.of(context).colorScheme.primary,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.medical_services_outlined,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
+          ),
+          const SizedBox(width: 14),
 
-            const SizedBox(height: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pemeriksaan $jenis',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(tanggal, style: Theme.of(context).textTheme.bodyMedium),
+                Text(kode, style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+          ),
 
-            // tombol-tombol
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: cs.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.visibility),
-              label: const Text('Lihat hasil pemeriksaan'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LihatHasilPage()),
-                );
-              },
+          if (showChevron) ...[
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 28,
             ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: cs.tertiaryContainer,
-                foregroundColor: cs.onTertiaryContainer,
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.download),
-              label: const Text('Unduh file hasil pemeriksaan'),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('File berhasil di unduh.'),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.error_outline),
-              label: const Text('Laporkan Kesalahan'),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Laporan kesalahan dikirim.')),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
           ],
-        ),
+        ],
       ),
     );
+
+    if (onTap == null) return card;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: card,
+    );
+  }
+
+  String _iconForCategory(String jenis) {
+    switch (jenis) {
+      case 'Patologi':
+        return 'assets/icons/icon-patologi.png';
+      case 'Anatomi':
+        return 'assets/icons/icon-anatomi.png';
+      case 'Mikrobiologi':
+        return 'assets/icons/icon-mikrobiologi.png';
+      default:
+        return 'assets/icons/icon-patologi.png';
+    }
+  }
+
+  String _formatTanggal(String iso) {
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      return DateId.formatFullWithTime(dt);
+    } catch (_) {
+      return iso.isEmpty ? '-' : iso;
+    }
   }
 }
 
-/// lihat hasil page — halaman detail hasil pemeriksaan
-class LihatHasilPage extends StatelessWidget {
-  const LihatHasilPage({super.key});
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorState({required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lihat Hasil'),
-        centerTitle: true,
-        backgroundColor: cs.surface,
-        foregroundColor: cs.onSurface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Center(
-        child: Image.asset(
-          'assets/images/hasil_lab_full.jpg',
-          fit: BoxFit.contain,
-        ),
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message, textAlign: TextAlign.center),
+          const SizedBox(height: 12),
+          ElevatedButton(onPressed: onRetry, child: const Text('Coba lagi')),
+        ],
       ),
     );
   }

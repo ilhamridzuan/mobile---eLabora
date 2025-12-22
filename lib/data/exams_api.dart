@@ -23,4 +23,16 @@ class ExamsApi {
       throw Exception(msg);
     }
   }
+
+  Future<Map<String, dynamic>> detail(int id) async {
+    try {
+      final res = await _client.dio.get('/exams/$id');
+      return Map<String, dynamic>.from(res.data as Map);
+    } on DioException catch (e) {
+      final msg = (e.response?.data is Map && e.response?.data['message'] != null)
+          ? e.response?.data['message'].toString()
+          : (e.message ?? 'Gagal mengambil detail pemeriksaan');
+      throw Exception(msg);
+    }
+  }
 }
