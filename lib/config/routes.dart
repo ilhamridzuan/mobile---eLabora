@@ -1,4 +1,5 @@
 import 'package:elabora_app/pages/akun.dart';
+import 'package:elabora_app/pages/akun_dokter.dart';
 import 'package:elabora_app/pages/antrian.dart';
 import 'package:elabora_app/pages/detail_antrian.dart';
 import 'package:elabora_app/pages/doctor_home_page.dart';
@@ -6,6 +7,7 @@ import 'package:elabora_app/pages/cari_pasien_page.dart';
 import 'package:elabora_app/pages/hasil_detail_page.dart';
 import 'package:elabora_app/pages/pencarian_page.dart';
 import 'package:elabora_app/pages/pendaftaran.dart';
+import 'package:elabora_app/pages/semua_pemeriksaan_page.dart';
 import 'package:flutter/material.dart';
 import 'package:elabora_app/pages/home_page.dart';
 import 'package:elabora_app/pages/riwayat_page.dart';
@@ -36,4 +38,6 @@ final Map<String, WidgetBuilder> appRoutes = {
     final id = args['id'] as int;
     return HasilDetailPage(id: id);
   },
+  '/semua_pemeriksaan': (context) => const SemuaPemeriksaanPage(),
+  '/akun_dokter': (context) => const AkunDokterPage(),
 };

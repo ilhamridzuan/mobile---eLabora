@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
+import '../data/api_client.dart';
+import '../data/patients_api.dart';
+import 'cek_hasil_page.dart';
 
 class CariPasienPage extends StatefulWidget {
   const CariPasienPage({super.key});
@@ -9,102 +12,127 @@ class CariPasienPage extends StatefulWidget {
 }
 
 class _CariPasienState extends State<CariPasienPage> {
-  final List<Map<String, String>> dataPasien = [
-    {
-      'nama': 'Ahmad Fauzi',
-      'nik': '3201010101990001',
-      'telepon': '+62 812-3456-7001',
-    },
-    {
-      'nama': 'Siti Nurhaliza',
-      'nik': '3201021503910002',
-      'telepon': '+62 813-4567-7002',
-    },
-    {
-      'nama': 'Budi Santoso',
-      'nik': '3201032304980003',
-      'telepon': '+62 814-5678-7003',
-    },
-    {
-      'nama': 'Rina Maharani',
-      'nik': '3201040502850004',
-      'telepon': '+62 815-6789-7004',
-    },
-    {
-      'nama': 'Teguh Prasetya',
-      'nik': '3201051203720005',
-      'telepon': '+62 816-7890-7005',
-    },
-    {
-      'nama': 'Wulan Ayu',
-      'nik': '3201063005990006',
-      'telepon': '+62 817-8901-7006',
-    },
-    {
-      'nama': 'Rizky Ramadhan',
-      'nik': '3201070706760007',
-      'telepon': '+62 818-9012-7007',
-    },
-  ];
+  late final ApiClient _client;
+  late final PatientsApi _patientsApi;
 
-  List<Map<String, String>> items = [];
+  late Future<List<Map<String, dynamic>>> _futureRows;
+
+  final TextEditingController _searchC = TextEditingController();
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _client = ApiClient();
+    _patientsApi = PatientsApi(_client);
+    _futureRows = _load();
+
+    _searchC.addListener(() {
+      setState(() => _query = _searchC.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchC.dispose();
+    super.dispose();
+  }
+
+  Future<List<Map<String, dynamic>>> _load() async {
+    return await _patientsApi.listPatients(); // ✅ GET /patients -> items[]
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _futureRows = _load());
+    await _futureRows;
+  }
+
+  bool _match(Map<String, dynamic> p) {
+    if (_query.isEmpty) return true;
+
+    final haystack = <String>[
+      (p['nama'] ?? '').toString(),
+      (p['nik'] ?? '').toString(),
+      (p['username'] ?? '').toString(),
+      (p['email'] ?? '').toString(),
+      (p['no_telepon'] ?? '').toString(),
+      (p['id'] ?? '').toString(),
+    ].join(' ').toLowerCase();
+
+    return haystack.contains(_query);
+  }
 
   @override
   Widget build(BuildContext context) {
-    items = dataPasien;
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-        title: const Text('Data Pasien'),
+        title: const Text('Cari Pasien'),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           children: [
+            // ✅ Search bar
             TextField(
+              controller: _searchC,
+              textInputAction: TextInputAction.search,
               decoration: InputDecoration(
-                hintText: 'Cari pasien...',
-                prefixIcon: const Icon(Icons.search),
+                hintText: 'Cari pasien (nama / NIK / username / email)...',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => _searchC.clear(),
+                      ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide().copyWith(color: AppColors.textSecondary)
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
                 ),
               ),
-              onChanged: (value) {
-                setState(() {
-                  if (value.isEmpty) {
-                    items = dataPasien;
-                  } else {
-                    items = dataPasien
-                        .where(
-                          (element) =>
-                              element['nama']!.toLowerCase().contains(
-                                value.toLowerCase(),
-                              ) ||
-                              element['nik']!.toLowerCase().contains(
-                                value.toLowerCase(),
-                              ),
-                        )
-                        .toList();
-                  }
-                });
-              },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             Expanded(
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) => _buildPasienItem(items[index]),
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: _futureRows,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return _ErrorState(
+                      message: snapshot.error.toString(),
+                      onRetry: () => setState(() => _futureRows = _load()),
+                    );
+                  }
+
+                  final rows = (snapshot.data ?? []).where(_match).toList();
+
+                  if (rows.isEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: 120),
+                          Icon(Icons.inbox_rounded, size: 56),
+                          SizedBox(height: 12),
+                          Center(child: Text('Pasien tidak ditemukan.')),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: _refresh,
+                    child: ListView.builder(
+                      itemCount: rows.length,
+                      itemBuilder: (context, index) {
+                        return _buildPatientCard(rows[index]);
+                      },
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -113,72 +141,118 @@ class _CariPasienState extends State<CariPasienPage> {
     );
   }
 
-  Widget _buildPasienItem(Map<String, String> items) {
-    String iconPath = 'assets/icons/icon-pasien.png';
+  Widget _buildPatientCard(Map<String, dynamic> p) {
+    final pasienId = (p['id'] is int)
+        ? p['id'] as int
+        : int.tryParse((p['id'] ?? '').toString()) ?? 0;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textSecondary.withValues(alpha: 0.15),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Image.asset(
-              iconPath,
-              width: 28,
-              height: 28,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          const SizedBox(width: 14),
+    final nama = (p['nama'] ?? 'Pasien').toString();
+    final nik = (p['nik'] ?? '-').toString();
+    final telp = (p['no_telepon'] ?? '-').toString();
+    final email = (p['email'] ?? '').toString();
+    final username = (p['username'] ?? '').toString();
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  items['nama']!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: pasienId == 0
+          ? null
+          : () {
+              // ✅ buka cek_hasil_page berdasarkan pasienId
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CekHasilPage(pasienId: pasienId),
                 ),
-                Text(
-                  items['nik']!,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  items['telepon']!,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 4),
-              ],
-            ),
-          ),
-
-          GestureDetector(
-            onTap: () {
-              
+              );
             },
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              child: Icon(Icons.chevron_right_rounded),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textSecondary.withValues(alpha: 0.15),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             ),
-          ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.person_rounded,
+                size: 28,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    nama,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('NIK: $nik', style: Theme.of(context).textTheme.bodyMedium),
+                  Text('Telp: $telp', style: Theme.of(context).textTheme.bodyMedium),
+                  if (username.isNotEmpty || email.isNotEmpty)
+                    Text(
+                      [
+                        if (username.isNotEmpty) '@$username',
+                        if (email.isNotEmpty) email,
+                      ].join(' • '),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 28,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message, textAlign: TextAlign.center),
+          const SizedBox(height: 12),
+          ElevatedButton(onPressed: onRetry, child: const Text('Coba lagi')),
         ],
       ),
     );
