@@ -3,6 +3,7 @@ import 'package:elabora_app/pages/antrian.dart';
 import 'package:elabora_app/pages/detail_antrian.dart';
 import 'package:elabora_app/pages/doctor_home_page.dart';
 import 'package:elabora_app/pages/cari_pasien_page.dart';
+import 'package:elabora_app/pages/hasil_detail_page.dart';
 import 'package:elabora_app/pages/pencarian_page.dart';
 import 'package:elabora_app/pages/pendaftaran.dart';
 import 'package:flutter/material.dart';
