@@ -14,6 +14,7 @@ import '../pages/landing_page.dart';
 import '../pages/login_page.dart';
 import '../pages/cek_hasil_page.dart';
 import '../pages/register_patient_page.dart';
+import '../pages/hasil_detail_page.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/': (context) => const LandingPage(),

@@ -22,7 +22,7 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
   late final ExamsApi _examsApi;
 
   late Future<Map<String, dynamic>> _futureDetail;
-  final Map<String, bool> _downloading = {}; // per-file
+  final Map<String, bool> _downloading = {};
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
     return clean.split('/').last;
   }
 
-  /// ✅ Download file → Snackbar ada tombol "Buka"
+  //Download file : Snackbar ada tombol "Buka"
   Future<void> _downloadFile({
     required String url,
     required String saveAsName,
@@ -90,9 +90,7 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
               if (result.type != ResultType.done) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      result.message ?? 'Gagal membuka file',
-                    ),
+                    content: Text(result.message ?? 'Gagal membuka file'),
                   ),
                 );
               }
@@ -101,22 +99,19 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
         ),
       );
     } on DioException catch (e) {
-      final msg = (e.response?.data is Map &&
-              e.response?.data['message'] != null)
+      final msg =
+          (e.response?.data is Map && e.response?.data['message'] != null)
           ? e.response?.data['message'].toString()
           : (e.message ?? 'Gagal download file');
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg ?? 'Terjadi Kesalahan.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(msg ?? 'Terjadi Kesalahan.')));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              Text(e.toString().replaceFirst('Exception: ', '')),
-        ),
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     } finally {
       if (mounted) setState(() => _downloading[url] = false);
@@ -140,22 +135,21 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
           if (snapshot.hasError) {
             return _ErrorState(
               message: snapshot.error.toString(),
-              onRetry: () => setState(
-                () => _futureDetail = _examsApi.detail(widget.id),
-              ),
+              onRetry: () =>
+                  setState(() => _futureDetail = _examsApi.detail(widget.id)),
             );
           }
 
           final data = snapshot.data ?? {};
           final kategori = (data['kategori_nama'] ?? '-').toString();
           final tglRaw = (data['tgl_pemeriksaan'] ?? '').toString();
-          final statusValidasi =
-              (data['status_validasi'] ?? '-').toString();
+          final statusValidasi = (data['status_validasi'] ?? '-').toString();
           final catatan = (data['catatan'] ?? '-').toString();
           final tanggal = _formatTanggal(tglRaw);
 
-          final files =
-              (data['files'] is List) ? data['files'] as List : <dynamic>[];
+          final files = (data['files'] is List)
+              ? data['files'] as List
+              : <dynamic>[];
           final fileMaps = files
               .whereType<Map>()
               .map((e) => Map<String, dynamic>.from(e))
@@ -164,7 +158,7 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // ===== Info Pemeriksaan =====
+              // Info Pemeriksaan
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -172,8 +166,7 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          AppColors.textSecondary.withValues(alpha: 0.12),
+                      color: AppColors.textSecondary.withValues(alpha: 0.12),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -182,34 +175,52 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Kategori',
-                        style: text.bodyMedium
-                            ?.copyWith(color: AppColors.textSecondary)),
+                    Text(
+                      'Kategori',
+                      style: text.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(kategori,
-                        style: text.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      kategori,
+                      style: text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 12),
 
-                    Text('Tanggal Pemeriksaan',
-                        style: text.bodyMedium
-                            ?.copyWith(color: AppColors.textSecondary)),
+                    Text(
+                      'Tanggal Pemeriksaan',
+                      style: text.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(tanggal,
-                        style: text.bodyLarge
-                            ?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(
+                      tanggal,
+                      style: text.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 12),
 
-                    Text('Status Validasi',
-                        style: text.bodyMedium
-                            ?.copyWith(color: AppColors.textSecondary)),
+                    Text(
+                      'Status Validasi',
+                      style: text.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     _StatusChip(label: statusValidasi),
 
                     const SizedBox(height: 12),
-                    Text('Catatan',
-                        style: text.bodyMedium
-                            ?.copyWith(color: AppColors.textSecondary)),
+                    Text(
+                      'Catatan',
+                      style: text.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(catatan, style: text.bodyLarge),
                   ],
@@ -217,9 +228,10 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
               ),
 
               const SizedBox(height: 16),
-              Text('File Pemeriksaan',
-                  style: text.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                'File Pemeriksaan',
+                style: text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 10),
 
               if (fileMaps.isEmpty)
@@ -264,7 +276,8 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
                                   name,
                                   overflow: TextOverflow.ellipsis,
                                   style: text.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w600),
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
@@ -277,20 +290,20 @@ class _HasilDetailPageState extends State<HasilDetailPage> {
                           child: ElevatedButton.icon(
                             onPressed: downloading
                                 ? null
-                                : () => _downloadFile(
-                                      url: url,
-                                      saveAsName: name,
-                                    ),
+                                : () =>
+                                      _downloadFile(url: url, saveAsName: name),
                             icon: downloading
                                 ? const SizedBox(
                                     width: 18,
                                     height: 18,
                                     child: CircularProgressIndicator(
-                                        strokeWidth: 2),
+                                      strokeWidth: 2,
+                                    ),
                                   )
                                 : const Icon(Icons.download_rounded),
                             label: Text(
-                                downloading ? 'Mengunduh...' : 'Download'),
+                              downloading ? 'Mengunduh...' : 'Download',
+                            ),
                           ),
                         ),
                       ],
@@ -318,10 +331,16 @@ class _StatusChip extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Text(
         label,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

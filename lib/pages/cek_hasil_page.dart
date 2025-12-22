@@ -90,11 +90,12 @@ class _CekHasilPageState extends State<CekHasilPage> {
             final filtered = selectedCategory == 'Semua'
                 ? rows
                 : rows
-                    .where(
-                      (e) =>
-                          (e['kategori_nama'] ?? '').toString() == selectedCategory,
-                    )
-                    .toList();
+                      .where(
+                        (e) =>
+                            (e['kategori_nama'] ?? '').toString() ==
+                            selectedCategory,
+                      )
+                      .toList();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,15 +110,22 @@ class _CekHasilPageState extends State<CekHasilPage> {
                         child: ChoiceChip(
                           label: Text(cat),
                           selected: isSelected,
-                          onSelected: (_) => setState(() => selectedCategory = cat),
+                          onSelected: (_) =>
+                              setState(() => selectedCategory = cat),
                           selectedColor: Theme.of(context).primaryColor,
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surface,
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.textSecondary,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                           side: BorderSide(
-                            color: AppColors.textSecondary.withValues(alpha: 0.15),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.15,
+                            ),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
@@ -234,9 +242,9 @@ class _CekHasilPageState extends State<CekHasilPage> {
               children: [
                 Text(
                   'Pemeriksaan $jenis',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(tanggal, style: Theme.of(context).textTheme.bodyMedium),
