@@ -21,7 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     final client = ApiClient();
-    final storage = TokenStorage();
     _authApi = AuthApi(client);
   }
 
