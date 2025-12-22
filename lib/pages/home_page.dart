@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/api_client.dart';
 import '../data/auth_api.dart';
+import '../data/exams_api.dart';
+import '../utils/date_id.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,6 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final ApiClient _client;
   late final AuthApi _authApi;
+  late final ExamsApi _examsApi;
 
   late Future<Map<String, dynamic>> _futureMe;
 
@@ -19,7 +22,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _client = ApiClient();
-    _authApi = AuthApi(_client );
+    _authApi = AuthApi(_client);
+    _examsApi = ExamsApi(_client);
 
     _futureMe = _authApi.me();
   }
@@ -29,6 +33,15 @@ class _HomePageState extends State<HomePage> {
     final r = role.replaceAll('_', ' ').toLowerCase();
     if (r.isEmpty) return '-';
     return r[0].toUpperCase() + r.substring(1);
+  }
+
+  String _formatTanggal(String iso) {
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      return DateId.formatFullWithTime(dt);
+    } catch (_) {
+      return iso.isEmpty ? '-' : iso;
+    }
   }
 
   @override
@@ -42,6 +55,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, snapshot) {
           String nama = 'Memuat...';
           String roleLabel = '';
+          Map<String, dynamic>? profil; // ✅ dipakai untuk pasienId
 
           if (snapshot.connectionState == ConnectionState.waiting) {
             // biarkan default "Memuat..."
@@ -51,7 +65,7 @@ class _HomePageState extends State<HomePage> {
           } else if (snapshot.hasData) {
             final data = snapshot.data!;
             final akun = (data['akun'] as Map?)?.cast<String, dynamic>();
-            final profil = (data['profil'] as Map?)?.cast<String, dynamic>();
+            profil = (data['profil'] as Map?)?.cast<String, dynamic>();
 
             nama = (profil?['nama'] ?? akun?['username'] ?? '-').toString();
             final role = (akun?['role'] ?? '-').toString();
@@ -155,13 +169,15 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 28),
 
-                  // Aktivitas Terakhir
+                  // Aktivitas Terakhir (DIGANTI -> berdasarkan hasil pemeriksaan terbaru yang tersedia)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Aktivitas Terakhir', style: t.titleLarge),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/cek_hasil');
+                        },
                         child: Text(
                           'Lihat semua',
                           style: t.bodyMedium?.copyWith(color: cs.primary),
@@ -171,26 +187,82 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 8),
 
-                  const _ActivityItem(
-                    icon: Icons.biotech_rounded,
-                    title: 'Mendapatkan hasil pemeriksaan',
-                    date: 'Kamis, 05 Juni 2025 Pukul 12.30',
-                  ),
-                  const _ActivityItem(
-                    icon: Icons.confirmation_number_outlined,
-                    title: 'Mendapatkan nomor antrian',
-                    date: 'Kamis, 05 Juni 2025 Pukul 09.50',
-                  ),
-                  const _ActivityItem(
-                    icon: Icons.assignment_add,
-                    title: 'Melakukan pendaftaran',
-                    date: 'Kamis, 05 Juni 2025 Pukul 09.45',
-                  ),
-                  const _ActivityItem(
-                    icon: Icons.biotech_rounded,
-                    title: 'Mendapatkan hasil pemeriksaan',
-                    date: 'Senin, 15 Januari 2025 Pukul 15.30',
-                  ),
+                  // ✅ Jika profil/pasienId tersedia, ambil hasil terbaru dari API.
+                  if (profil == null || profil!['id'] == null)
+                    const _ActivityItem(
+                      icon: Icons.info_outline_rounded,
+                      title: 'Aktivitas belum tersedia',
+                      date: '-',
+                    )
+                  else
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: _examsApi.listByPatient(profil!['id'] as int),
+                      builder: (context, examsSnap) {
+                        if (examsSnap.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        if (examsSnap.hasError) {
+                          return _ActivityItem(
+                            icon: Icons.error_outline_rounded,
+                            title: 'Gagal memuat aktivitas',
+                            date: examsSnap.error.toString(),
+                          );
+                        }
+
+                        final rows = examsSnap.data ?? [];
+
+                        // ✅ sama seperti cek_hasil_page.dart: hanya HASIL_TERSEDIA
+                        final hasilTersedia = rows.where((e) {
+                          final status =
+                              (e['status_hasil'] ?? '').toString().toUpperCase();
+                          return status == 'HASIL_TERSEDIA';
+                        }).toList();
+
+                        // urutkan terbaru berdasarkan tgl_pemeriksaan
+                        hasilTersedia.sort((a, b) {
+                          final da = DateTime.tryParse(
+                            (a['tgl_pemeriksaan'] ?? '').toString(),
+                          );
+                          final db = DateTime.tryParse(
+                            (b['tgl_pemeriksaan'] ?? '').toString(),
+                          );
+                          if (da == null && db == null) return 0;
+                          if (da == null) return 1;
+                          if (db == null) return -1;
+                          return db.compareTo(da);
+                        });
+
+                        final latest = hasilTersedia.take(4).toList();
+
+                        if (latest.isEmpty) {
+                          return const _ActivityItem(
+                            icon: Icons.inbox_rounded,
+                            title: 'Belum ada hasil pemeriksaan tersedia',
+                            date: '-',
+                          );
+                        }
+
+                        return Column(
+                          children: latest.map((e) {
+                            final kategori =
+                                (e['kategori_nama'] ?? '-').toString();
+                            final tglRaw =
+                                (e['tgl_pemeriksaan'] ?? '').toString();
+
+                            return _ActivityItem(
+                              icon: Icons.biotech_rounded,
+                              title: 'Hasil pemeriksaan tersedia ($kategori)',
+                              date: _formatTanggal(tglRaw),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),
@@ -316,7 +388,7 @@ class _ActivityItem extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: [ 
                 Text(
                   title,
                   style: t.bodyLarge?.copyWith(fontWeight: FontWeight.w600),

@@ -5,6 +5,30 @@ class ExamsApi {
   final ApiClient _client;
   ExamsApi(this._client);
 
+  /// GET /exams/all
+  Future<List<Map<String, dynamic>>> listAll() async {
+    try {
+      final res = await _client.dio.get('/exams/all');
+      final data = res.data;
+
+      // support: { "data": [ ... ] } atau langsung [ ... ]
+      final List rows = (data is Map && data['data'] is List)
+          ? (data['data'] as List)
+          : (data is List ? data : <dynamic>[]);
+
+      return rows
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    } on DioException catch (e) {
+      final msg =
+          (e.response?.data is Map && e.response?.data['message'] != null)
+              ? e.response?.data['message'].toString()
+              : (e.message ?? 'Gagal mengambil semua hasil pemeriksaan');
+      throw Exception(msg);
+    }
+  }
+
   /// GET /exams/patients/:pasienId
   Future<List<Map<String, dynamic>>> listByPatient(int pasienId) async {
     try {
