@@ -16,14 +16,18 @@ class PendaftaranPage extends StatefulWidget {
 class _PendaftaranPageState extends State<PendaftaranPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // --- Form state (UI kamu) ---
-  String? _jenisKelamin;
+  // --- Form state ---
+  String? _jenisKelamin; // 'L' / 'P'
   DateTime? _tanggalLahir;
   DateTime? _tanggalPeriksa;
   TimeOfDay? _waktuPeriksa;
 
   File? _referralLetter;
   String? _referralFileName;
+
+  // Controller untuk identitas (autofill dari /auth/me)
+  final TextEditingController _namaC = TextEditingController();
+  final TextEditingController _nikC = TextEditingController();
 
   // Untuk menampilkan value di TextFormField readOnly
   final TextEditingController _tglLahirC = TextEditingController();
@@ -34,19 +38,69 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
   late final ApiClient _client;
 
   bool _submitting = false;
+  bool _loadingProfile = false;
 
   @override
   void initState() {
     super.initState();
     _client = ApiClient();
+    _prefillFromMe();
   }
 
   @override
   void dispose() {
+    _namaC.dispose();
+    _nikC.dispose();
     _tglLahirC.dispose();
     _tglPeriksaC.dispose();
     _waktuPeriksaC.dispose();
     super.dispose();
+  }
+
+  Future<void> _prefillFromMe() async {
+    setState(() => _loadingProfile = true);
+
+    try {
+      final res = await _client.dio.get('/auth/me');
+      final body = (res.data is Map) ? Map<String, dynamic>.from(res.data) : <String, dynamic>{};
+      final profil = (body['profil'] is Map) ? Map<String, dynamic>.from(body['profil']) : null;
+
+      if (profil == null) return;
+
+      final nama = (profil['nama'] ?? '').toString();
+      final nik = (profil['nik'] ?? '').toString();
+      final jk = (profil['jenis_kelamin'] ?? '').toString(); // biasanya 'L'/'P'
+      final tglLahirRaw = profil['tgl_lahir']; // bisa null atau ISO
+
+      DateTime? tglLahir;
+      if (tglLahirRaw != null && tglLahirRaw.toString().isNotEmpty) {
+        try {
+          tglLahir = DateTime.parse(tglLahirRaw.toString()).toLocal();
+        } catch (_) {
+          tglLahir = null;
+        }
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _namaC.text = nama;
+        _nikC.text = nik;
+
+        // jenis kelamin
+        if (jk == 'L' || jk == 'P') {
+          _jenisKelamin = jk;
+        }
+
+        // tanggal lahir
+        _tanggalLahir = tglLahir;
+        _tglLahirC.text = (tglLahir != null) ? _displayDate(tglLahir) : '';
+      });
+    } catch (_) {
+      // kalau gagal, biarkan saja (user masih bisa isi manual)
+    } finally {
+      if (mounted) setState(() => _loadingProfile = false);
+    }
   }
 
   String _yyyyMmDd(DateTime d) {
@@ -57,7 +111,7 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
   }
 
   String _jadwalPemeriksaanAt(DateTime date, TimeOfDay time) {
-    // format yang backend kamu pakai contoh: "2025-12-25 10:00:00"
+    // format backend: "2025-12-25 10:00:00"
     final ymd = _yyyyMmDd(date);
     final hh = time.hour.toString().padLeft(2, '0');
     final mm = time.minute.toString().padLeft(2, '0');
@@ -91,21 +145,16 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
   }
 
   Future<void> _submit() async {
-    // Validasi minimal yang benar-benar dibutuhkan endpoint
     if (_tanggalPeriksa == null || _waktuPeriksa == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pilih tanggal & waktu pemeriksaan terlebih dahulu.'),
-        ),
+        const SnackBar(content: Text('Pilih tanggal & waktu pemeriksaan terlebih dahulu.')),
       );
       return;
     }
 
     if (_referralLetter == null || _referralFileName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Upload surat rujukan (pdf/jpg/png) terlebih dahulu.'),
-        ),
+        const SnackBar(content: Text('Upload surat rujukan (pdf/jpg/png) terlebih dahulu.')),
       );
       return;
     }
@@ -113,16 +162,12 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
     setState(() => _submitting = true);
 
     try {
-      // ✅ tanggal_antrian = tanggal yang sama dengan jadwal pemeriksaan
       final tanggalAntrian = _yyyyMmDd(_tanggalPeriksa!);
-
-      // ✅ jadwal_pemeriksaan_at = tanggal + waktu yang dipilih
       final jadwal = _jadwalPemeriksaanAt(_tanggalPeriksa!, _waktuPeriksa!);
 
       final formData = FormData.fromMap({
         'tanggal_antrian': tanggalAntrian,
         'jadwal_pemeriksaan_at': jadwal,
-        // Field upload sesuai Express: multer.single("surat_rujukan")
         'surat_rujukan': await MultipartFile.fromFile(
           _referralLetter!.path,
           filename: _referralFileName!,
@@ -146,22 +191,19 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Pendaftaran berhasil! No antrian: $noAntrian | $noLab',
-          ),
+          content: Text('Pendaftaran berhasil! No antrian: $noAntrian | $noLab'),
           duration: const Duration(seconds: 2),
         ),
       );
 
       Navigator.pushReplacementNamed(context, '/antrian');
     } on DioException catch (e) {
-      final msg =
-          e.response?.data is Map && (e.response?.data['message'] != null)
+      final msg = (e.response?.data is Map && e.response?.data['message'] != null)
           ? e.response?.data['message'].toString()
           : (e.message ?? 'Gagal melakukan pendaftaran');
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg!)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg ?? 'Gagal melakukan pendaftaran')));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -191,7 +233,6 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
           onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
         ),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -199,64 +240,67 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Form Pendaftaran Pemeriksaan Lab',
-                style: text.displayLarge,
-              ),
+              Text('Form Pendaftaran Pemeriksaan Lab', style: text.displayLarge),
               const SizedBox(height: 8),
               Text(
                 'Lengkapi data pendaftaran dan upload surat rujukan.',
-                style: text.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: text.bodyMedium?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 18),
 
-              // ====== (Bagian identitas tetap seperti file kamu; tidak dipakai ke endpoint) ======
-              Text(
-                'Nama Lengkap *',
-                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              if (_loadingProfile)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: color.outline.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: const [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(child: Text('Memuat data profil...')),
+                    ],
+                  ),
+                ),
+
+              // ====== Identitas (autofill dari /auth/me) ======
+              Text('Nama Lengkap *', style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan nama lengkap',
-                ),
+                controller: _namaC,
+                decoration: const InputDecoration(hintText: 'Masukkan nama lengkap'),
               ),
               const SizedBox(height: 14),
 
-              Text(
-                'NIK / No. Identitas *',
-                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              Text('NIK / No. Identitas *', style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               TextFormField(
+                controller: _nikC,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan NIK / No. Identitas',
-                ),
+                decoration: const InputDecoration(hintText: 'Masukkan NIK / No. Identitas'),
               ),
               const SizedBox(height: 14),
 
-              Text(
-                'Tanggal Lahir',
-                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              Text('Tanggal Lahir', style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _tglLahirC,
                 readOnly: true,
                 decoration: InputDecoration(
                   hintText: 'Pilih tanggal lahir',
-                  suffixIcon: Icon(
-                    Icons.calendar_today_outlined,
-                    color: color.primary,
-                  ),
+                  suffixIcon: Icon(Icons.calendar_today_outlined, color: color.primary),
                 ),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
-                    initialDate: DateTime.now(),
+                    initialDate: _tanggalLahir ?? DateTime.now(),
                     firstDate: DateTime(1950),
                     lastDate: DateTime(2100),
                   );
@@ -270,16 +314,11 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
               ),
               const SizedBox(height: 14),
 
-              Text(
-                'Jenis Kelamin *',
-                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              Text('Jenis Kelamin *', style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                initialValue: _jenisKelamin,
-                decoration: const InputDecoration(
-                  hintText: 'Pilih jenis kelamin',
-                ),
+                value: _jenisKelamin,
+                decoration: const InputDecoration(hintText: 'Pilih jenis kelamin'),
                 items: const [
                   DropdownMenuItem(value: 'L', child: Text('Laki-laki')),
                   DropdownMenuItem(value: 'P', child: Text('Perempuan')),
@@ -288,33 +327,23 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
               ),
 
               const SizedBox(height: 24),
-              Text(
-                'Jadwal Pemeriksaan *',
-                style: text.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              Text('Jadwal Pemeriksaan *', style: text.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 16),
 
-              Text(
-                'Tanggal Pemeriksaan',
-                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              Text('Tanggal Pemeriksaan', style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _tglPeriksaC,
                 readOnly: true,
                 decoration: InputDecoration(
                   hintText: 'Pilih tanggal pemeriksaan',
-                  suffixIcon: Icon(
-                    Icons.calendar_today_outlined,
-                    color: color.primary,
-                  ),
+                  suffixIcon: Icon(Icons.calendar_today_outlined, color: color.primary),
                 ),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
-                    initialDate: DateTime.now(),
-                    firstDate:
-                        DateTime.now(), // pendaftaran untuk tanggal sekarang dan seterusnya
+                    initialDate: _tanggalPeriksa ?? DateTime.now(),
+                    firstDate: DateTime.now(),
                     lastDate: DateTime(2100),
                   );
                   if (picked != null) {
@@ -327,25 +356,19 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
               ),
               const SizedBox(height: 14),
 
-              Text(
-                'Waktu Pemeriksaan',
-                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              Text('Waktu Pemeriksaan', style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _waktuPeriksaC,
                 readOnly: true,
                 decoration: InputDecoration(
                   hintText: 'Pilih waktu pemeriksaan',
-                  suffixIcon: Icon(
-                    Icons.access_time_rounded,
-                    color: color.primary,
-                  ),
+                  suffixIcon: Icon(Icons.access_time_rounded, color: color.primary),
                 ),
                 onTap: () async {
                   final picked = await showTimePicker(
                     context: context,
-                    initialTime: TimeOfDay.now(),
+                    initialTime: _waktuPeriksa ?? TimeOfDay.now(),
                   );
                   if (picked != null) {
                     setState(() {
@@ -357,16 +380,11 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
               ),
 
               const SizedBox(height: 24),
-              Text(
-                'Surat Rujukan *',
-                style: text.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-              ),
+              Text('Surat Rujukan *', style: text.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 10),
               Text(
                 'Upload surat rujukan (pdf/jpg/png).',
-                style: text.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: text.bodyMedium?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 10),
 
@@ -379,9 +397,7 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
                   decoration: BoxDecoration(
                     color: color.surface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: color.outline.withValues(alpha: 0.25),
-                    ),
+                    border: Border.all(color: color.outline.withValues(alpha: 0.25)),
                   ),
                   child: Row(
                     children: [
@@ -398,10 +414,7 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: color.onSurfaceVariant,
-                      ),
+                      Icon(Icons.chevron_right_rounded, color: color.onSurfaceVariant),
                     ],
                   ),
                 ),

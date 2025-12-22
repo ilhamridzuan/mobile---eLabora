@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/api_client.dart';
 import '../data/auth_api.dart';
-import '../data/token_storage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,7 +11,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late final ApiClient _client;
-  late final TokenStorage _tokenStorage;
   late final AuthApi _authApi;
 
   late Future<Map<String, dynamic>> _futureMe;
@@ -21,7 +19,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _client = ApiClient();
-    _tokenStorage = TokenStorage();
     _authApi = AuthApi(_client );
 
     _futureMe = _authApi.me();
