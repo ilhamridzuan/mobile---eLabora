@@ -13,6 +13,7 @@ import '../pages/landing_page.dart';
 import '../pages/login_page.dart';
 import '../pages/cek_hasil_page.dart';
 import '../pages/register_patient_page.dart';
+import '../pages/hasil_detail_page.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/': (context) => const LandingPage(),
@@ -30,4 +31,10 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/akun': (context) => const AkunPage(),
   '/data_pasien': (context) => const CariPasienPage(),
   '/pencarian': (context) => const PencarianPage(),
+  '/exam_detail': (context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final id = args['id'] as int;
+    return HasilDetailPage(id: id);
+  },
 };
