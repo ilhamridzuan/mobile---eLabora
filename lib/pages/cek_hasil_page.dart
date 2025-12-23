@@ -6,8 +6,7 @@ import '../data/auth_api.dart';
 import '../data/exams_api.dart';
 
 class CekHasilPage extends StatefulWidget {
-  /// ✅ Baru: jika diisi, halaman akan menampilkan hasil pemeriksaan pasien tersebut
-  /// Tanpa mengubah fungsionalitas lama: jika null, tetap ambil pasienId dari /auth/me
+  /// jika diisi, halaman akan menampilkan hasil pemeriksaan pasien tersebut
   final int? pasienId;
 
   const CekHasilPage({super.key, this.pasienId});
@@ -35,8 +34,8 @@ class _CekHasilPageState extends State<CekHasilPage> {
   }
 
   Future<List<Map<String, dynamic>>> _load() async {
-    // ✅ Prioritas: jika pasienId dikirim dari page lain (pencarian), pakai itu
-    // ✅ Jika tidak dikirim, fallback ke fungsionalitas lama: ambil dari /auth/me
+    // Prioritas: jika pasienId dikirim dari page lain (pencarian), pakai itu
+    // Jika tidak dikirim, fallback ke fungsionalitas lama: ambil dari /auth/me
     int pasienId;
 
     if (widget.pasienId != null) {
@@ -52,7 +51,7 @@ class _CekHasilPageState extends State<CekHasilPage> {
 
     final rows = await _examsApi.listByPatient(pasienId);
 
-    // ✅ Filter: hanya hasil tersedia (tetap sama seperti sebelumnya)
+    // Filter: hanya hasil tersedia (tetap sama seperti sebelumnya)
     return rows.where((e) {
       final status = (e['status_hasil'] ?? '').toString().toUpperCase();
       return status == 'HASIL_TERSEDIA';
@@ -185,7 +184,7 @@ class _CekHasilPageState extends State<CekHasilPage> {
       row,
       showChevron: true,
       onTap: () {
-        // ✅ Tetap seperti sebelumnya: pindah ke detail via named route
+        // Tetap seperti sebelumnya: pindah ke detail via named route
         Navigator.pushNamed(
           context,
           '/exam_detail',

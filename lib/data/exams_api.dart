@@ -11,7 +11,6 @@ class ExamsApi {
       final res = await _client.dio.get('/exams/all');
       final data = res.data;
 
-      // support: { "data": [ ... ] } atau langsung [ ... ]
       final List rows = (data is Map && data['data'] is List)
           ? (data['data'] as List)
           : (data is List ? data : <dynamic>[]);
@@ -35,7 +34,6 @@ class ExamsApi {
       final res = await _client.dio.get('/exams/patients/$pasienId');
       final data = res.data;
 
-      // response: { "data": [ ... ] }
       final rows = (data is Map && data['data'] is List)
           ? data['data'] as List
           : <dynamic>[];

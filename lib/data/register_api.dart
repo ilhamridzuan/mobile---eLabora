@@ -29,7 +29,6 @@ class RegisterApi {
         'no_telepon': noTelepon, // boleh null
       };
 
-      // debug biar yakin sama seperti Postman
       // ignore: avoid_print
       print('REGISTER /auth/register payload: $payload');
 

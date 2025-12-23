@@ -39,7 +39,7 @@ class _CariPasienState extends State<CariPasienPage> {
   }
 
   Future<List<Map<String, dynamic>>> _load() async {
-    return await _patientsApi.listPatients(); // ✅ GET /patients -> items[]
+    return await _patientsApi.listPatients(); // GET /patients -> items[]
   }
 
   Future<void> _refresh() async {
@@ -72,7 +72,7 @@ class _CariPasienState extends State<CariPasienPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           children: [
-            // ✅ Search bar
+            //  Search bar
             TextField(
               controller: _searchC,
               textInputAction: TextInputAction.search,
@@ -157,7 +157,7 @@ class _CariPasienState extends State<CariPasienPage> {
       onTap: pasienId == 0
           ? null
           : () {
-              // ✅ buka cek_hasil_page berdasarkan pasienId
+              //  buka cek_hasil_page berdasarkan pasienId
               Navigator.push(
                 context,
                 MaterialPageRoute(

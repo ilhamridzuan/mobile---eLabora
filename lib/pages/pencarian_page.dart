@@ -129,7 +129,6 @@ class _PencarianPageState extends State<PencarianPage> {
     return haystack.contains(_query);
   }
 
-  // ==== UI cards (mengikuti gaya card cek_hasil_page.dart) ====
 
   String _iconForCategory(String jenis) {
     switch (jenis) {

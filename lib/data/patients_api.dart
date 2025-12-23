@@ -11,7 +11,6 @@ class PatientsApi {
       final res = await _client.dio.get('/patients');
       final data = res.data;
 
-      // 🔥 FIX: backend mengirim "items", bukan "data"
       final List rows = (data is Map && data['items'] is List)
           ? (data['items'] as List)
           : <dynamic>[];
