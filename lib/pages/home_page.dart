@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, snapshot) {
           String nama = 'Memuat...';
           String roleLabel = '';
-          Map<String, dynamic>? profil; // ✅ dipakai untuk pasienId
+          Map<String, dynamic>? profil; // dipakai untuk pasienId
 
           if (snapshot.connectionState == ConnectionState.waiting) {
             // biarkan default "Memuat..."
@@ -169,7 +169,7 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 28),
 
-                  // Aktivitas Terakhir (DIGANTI -> berdasarkan hasil pemeriksaan terbaru yang tersedia)
+                  // Aktivitas Terakhir berdasarkan hasil pemeriksaan terbaru yang tersedia)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 8),
 
-                  // ✅ Jika profil/pasienId tersedia, ambil hasil terbaru dari API.
+                  // Jika profil/pasienId tersedia, ambil hasil terbaru dari API.
                   if (profil == null || profil!['id'] == null)
                     const _ActivityItem(
                       icon: Icons.info_outline_rounded,
@@ -216,7 +216,6 @@ class _HomePageState extends State<HomePage> {
 
                         final rows = examsSnap.data ?? [];
 
-                        // ✅ sama seperti cek_hasil_page.dart: hanya HASIL_TERSEDIA
                         final hasilTersedia = rows.where((e) {
                           final status =
                               (e['status_hasil'] ?? '').toString().toUpperCase();

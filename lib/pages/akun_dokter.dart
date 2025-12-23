@@ -89,7 +89,6 @@ class _AkunDokterPageState extends State<AkunDokterPage> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
             children: [
-              // ===== Profile Card (style mengikuti akun.dart) =====
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -154,8 +153,6 @@ class _AkunDokterPageState extends State<AkunDokterPage> {
 
               const SizedBox(height: 18),
 
-              // ===== Tanpa menu-menu akun.dart (dihapus) =====
-              // hanya tombol logout agar tetap usable
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(

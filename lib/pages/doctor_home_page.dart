@@ -48,7 +48,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
 
   String _pad3(dynamic v) => _toInt(v).toString().padLeft(3, '0');
 
-  /// ✅ Nomor antrian saat ini:
+  /// Nomor antrian saat ini:
   /// - Prioritas 1: item status == DILAYANI
   /// - Fallback: MENUNGGU dengan no_antrian paling kecil
   /// - Kalau kosong: "-"
@@ -163,7 +163,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
 
                     const SizedBox(height: 18),
 
-                    // ✅ menu layanan (card ukuran sama)
+                    // menu layanan 
                     SizedBox(
                       height: 110,
                       child: Row(
@@ -226,7 +226,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
         ),
       ),
 
-      // ✅ bottom nav: tambah menu akun
+      // bottom nav: tambah menu akun
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0, // Beranda
         selectedItemColor: Theme.of(context).colorScheme.primary,
@@ -259,7 +259,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
   }
 }
 
-// ✅ card menu layanan dengan tinggi konsisten
+// card menu layanan
 class _ServiceTile extends StatelessWidget {
   final IconData icon;
   final String label;

@@ -64,7 +64,7 @@ class _AntrianPageState extends State<AntrianPage> {
     }
   }
 
-  // ✅ ambil no_antrian “saat ini” berdasarkan status
+  //  ambil no_antrian “saat ini” berdasarkan status
   // prioritas: DILAYANI -> MENUNGGU terkecil -> null
   String? _currentNoFromItems(List<Map<String, dynamic>> items) {
     Map<String, dynamic>? current;
@@ -138,7 +138,7 @@ class _AntrianPageState extends State<AntrianPage> {
           final total = _toInt(stats['total']);
           final menunggu = _toInt(stats['menunggu']);
 
-          // ✅ Nomor antrian saat ini dari item status DILAYANI
+          //  Nomor antrian saat ini dari item status DILAYANI
           final currentNo = _currentNoFromItems(items) ?? '-';
 
           // ambil antrian user berdasarkan pasien_id
@@ -283,7 +283,6 @@ class _AntrianPageState extends State<AntrianPage> {
                     icon: Icons.groups_rounded,
                   ),
 
-                  // ✅ sekarang tampil no_antrian, bukan count
                   _StatCard(
                     title: 'Nomor antrian saat ini',
                     value: currentNo,

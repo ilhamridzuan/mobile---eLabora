@@ -42,9 +42,9 @@ class _SemuaPemeriksaanPageState extends State<SemuaPemeriksaanPage> {
   }
 
   Future<List<Map<String, dynamic>>> _load() async {
-    final rows = await _examsApi.listAll(); // ✅ GET /exams/all
+    final rows = await _examsApi.listAll(); // GET /exams/all
 
-    // ✅ Filter sama seperti cek_hasil_page.dart: hanya HASIL_TERSEDIA
+    // hanya HASIL_TERSEDIA
     return rows.where((e) {
       final status = (e['status_hasil'] ?? '').toString().toUpperCase();
       return status == 'HASIL_TERSEDIA';
@@ -131,7 +131,7 @@ class _SemuaPemeriksaanPageState extends State<SemuaPemeriksaanPage> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ✅ Search Bar
+                // Search Bar
                 TextField(
                   controller: _searchC,
                   textInputAction: TextInputAction.search,
@@ -152,7 +152,7 @@ class _SemuaPemeriksaanPageState extends State<SemuaPemeriksaanPage> {
 
                 const SizedBox(height: 12),
 
-                // ✅ Chips kategori (tetap seperti cek_hasil_page.dart)
+                // Chips kategori 
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(

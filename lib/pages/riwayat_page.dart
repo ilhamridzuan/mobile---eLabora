@@ -271,7 +271,6 @@ class _RiwayatPageState extends State<RiwayatPage> {
 
   String _formatTanggal(String iso) {
     try {
-      // server kamu mengirim ISO seperti "2025-12-21T10:57:01.000Z"
       final dt = DateTime.parse(iso).toLocal();
       return DateId.formatFullWithTime(dt);
     } catch (_) {
