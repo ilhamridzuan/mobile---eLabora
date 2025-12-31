@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "653992497446",
+    "project_id": "elabora-8c8c3",
+    "storage_bucket": "elabora-8c8c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653992497446:android:0b6f6347c3bfc6b93971e7",
+        "android_client_info": {
+          "package_name": "com.example.elabora_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPFYgWqclsVGpSAvYV8QMSI6Ss9gYOQxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

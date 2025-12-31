@@ -142,11 +142,6 @@ class _AkunDokterPageState extends State<AkunDokterPage> {
                         ],
                       ),
                     ),
-                    Icon(
-                      Icons.notifications_none_rounded,
-                      color: color.primary,
-                      size: 26,
-                    ),
                   ],
                 ),
               ),

@@ -151,13 +151,6 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
                             ),
                           ],
                         ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.notifications_none_rounded,
-                            color: color.onSurfaceVariant,
-                          ),
-                        ),
                       ],
                     ),
 
