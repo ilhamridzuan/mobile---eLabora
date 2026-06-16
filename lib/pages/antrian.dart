@@ -106,7 +106,7 @@ class _AntrianPageState extends State<AntrianPage> {
         foregroundColor: color.onSurface,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -299,25 +299,6 @@ class _AntrianPageState extends State<AntrianPage> {
             ),
           );
         },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor:
-            Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        showUnselectedLabels: true,
-        onTap: (value) {
-          Navigator.pushReplacementNamed(
-            context,
-            ['/home', '/antrian', '/akun'][value],
-          );
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt_rounded), label: 'Antrian'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Akun'),
-        ],
       ),
     );
   }

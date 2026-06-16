@@ -45,11 +45,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
         title: const Text('Riwayat Pemeriksaan'),
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -155,6 +152,43 @@ class _RiwayatPageState extends State<RiwayatPage> {
             );
           },
         ),
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: 2,
+        backgroundColor: Colors.white,
+        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        onDestinationSelected: (value) {
+          if (value == 2) return;
+          if (value == 0) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else if (value == 1) {
+            Navigator.pushReplacementNamed(context, '/cek_hasil');
+          } else if (value == 3) {
+            Navigator.pushReplacementNamed(context, '/akun');
+          }
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.biotech_outlined, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.biotech_rounded, color: AppColors.primary),
+            label: 'Hasil',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.history_outlined, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.history_rounded, color: AppColors.primary),
+            label: 'Riwayat',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.person_rounded, color: AppColors.primary),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
