@@ -39,7 +39,7 @@ class _CariPasienState extends State<CariPasienPage> {
   }
 
   Future<List<Map<String, dynamic>>> _load() async {
-    return await _patientsApi.listPatients(); // GET /patients -> items[]
+    return await _patientsApi.listPatients();
   }
 
   Future<void> _refresh() async {
@@ -62,35 +62,180 @@ class _CariPasienState extends State<CariPasienPage> {
     return haystack.contains(_query);
   }
 
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.isEmpty || name.isEmpty) return 'P';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  }
+
+  // Highlight matches inside result card strings
+  Widget _highlightText(
+    String text,
+    String query,
+    TextStyle baseStyle,
+    TextStyle highlightStyle,
+  ) {
+    if (query.isEmpty) {
+      return Text(
+        text,
+        style: baseStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+    final normalizedText = text.toLowerCase();
+    final normalizedQuery = query.toLowerCase();
+
+    final spans = <TextSpan>[];
+    int start = 0;
+
+    while (true) {
+      final index = normalizedText.indexOf(normalizedQuery, start);
+      if (index == -1) {
+        spans.add(TextSpan(text: text.substring(start)));
+        break;
+      }
+
+      if (index > start) {
+        spans.add(TextSpan(text: text.substring(start, index)));
+      }
+
+      spans.add(
+        TextSpan(
+          text: text.substring(index, index + normalizedQuery.length),
+          style: highlightStyle,
+        ),
+      );
+
+      start = index + normalizedQuery.length;
+    }
+
+    return RichText(
+      text: TextSpan(style: baseStyle, children: spans),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  // Material 3 layout for no results State
+  Widget _buildNoResultsState() {
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        children: [
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.textSecondary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.search_off_rounded,
+                size: 40,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          const Center(
+            child: Text(
+              'Pasien tidak ditemukan',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Center(
+            child: Text(
+              'Coba kata kunci ejaan lain atau gunakan NIK/ID Pasien.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cari Pasien'),
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+        title: const Text(
+          'Cari Pasien',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
         child: Column(
           children: [
-            //  Search bar
-            TextField(
-              controller: _searchC,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: 'Cari pasien (nama / NIK / username / email)...',
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _query.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () => _searchC.clear(),
-                      ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            // Sleek Material 3 rounded Search Bar with shadow
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.grey.shade200, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.textPrimary.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchC,
+                textInputAction: TextInputAction.search,
+                style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Cari pasien (nama / NIK / username / email)...',
+                  hintStyle: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: AppColors.textSecondary,
+                            size: 20,
+                          ),
+                          onPressed: () => _searchC.clear(),
+                        ),
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             Expanded(
               child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -109,23 +254,13 @@ class _CariPasienState extends State<CariPasienPage> {
                   final rows = (snapshot.data ?? []).where(_match).toList();
 
                   if (rows.isEmpty) {
-                    return RefreshIndicator(
-                      onRefresh: _refresh,
-                      child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: const [
-                          SizedBox(height: 120),
-                          Icon(Icons.inbox_rounded, size: 56),
-                          SizedBox(height: 12),
-                          Center(child: Text('Pasien tidak ditemukan.')),
-                        ],
-                      ),
-                    );
+                    return _buildNoResultsState();
                   }
 
                   return RefreshIndicator(
                     onRefresh: _refresh,
                     child: ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 16),
                       itemCount: rows.length,
                       itemBuilder: (context, index) {
                         return _buildPatientCard(rows[index]);
@@ -141,6 +276,7 @@ class _CariPasienState extends State<CariPasienPage> {
     );
   }
 
+  // Redesigned Patient Card: Modern profile list component
   Widget _buildPatientCard(Map<String, dynamic> p) {
     final pasienId = (p['id'] is int)
         ? p['id'] as int
@@ -152,86 +288,158 @@ class _CariPasienState extends State<CariPasienPage> {
     final email = (p['email'] ?? '').toString();
     final username = (p['username'] ?? '').toString();
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: pasienId == 0
-          ? null
-          : () {
-              //  buka cek_hasil_page berdasarkan pasienId
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CekHasilPage(pasienId: pasienId),
-                ),
-              );
-            },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.textSecondary.withValues(alpha: 0.15),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.person_rounded,
-                size: 28,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 14),
+    final baseNameStyle = const TextStyle(
+      color: AppColors.textPrimary,
+      fontSize: 15,
+      fontWeight: FontWeight.w600,
+    );
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    nama,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
+    final highlightNameStyle = const TextStyle(
+      color: AppColors.primary,
+      fontSize: 15,
+      fontWeight: FontWeight.bold,
+    );
+
+    final baseDetailStyle = const TextStyle(
+      color: AppColors.textSecondary,
+      fontSize: 12,
+    );
+
+    final highlightDetailStyle = const TextStyle(
+      color: AppColors.textPrimary,
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textPrimary.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: pasienId == 0
+            ? null
+            : () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CekHasilPage(pasienId: pasienId),
                   ),
-                  const SizedBox(height: 4),
-                  Text('NIK: $nik', style: Theme.of(context).textTheme.bodyMedium),
-                  Text('Telp: $telp', style: Theme.of(context).textTheme.bodyMedium),
-                  if (username.isNotEmpty || email.isNotEmpty)
-                    Text(
-                      [
-                        if (username.isNotEmpty) '@$username',
-                        if (email.isNotEmpty) email,
-                      ].join(' • '),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                ],
+                );
+              },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Initials Avatar
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  _getInitials(nama),
+                  style: const TextStyle(
+                    color: AppColors.secondaryDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 14),
 
-            const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: 28,
-            ),
-          ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _highlightText(nama, _query, baseNameStyle, highlightNameStyle),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.badge_rounded,
+                          size: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: _highlightText(
+                            'NIK: $nik',
+                            _query,
+                            baseDetailStyle,
+                            highlightDetailStyle,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.phone_rounded,
+                          size: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: _highlightText(
+                            'Telp: $telp',
+                            _query,
+                            baseDetailStyle,
+                            highlightDetailStyle,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (username.isNotEmpty || email.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.alternate_email_rounded,
+                            size: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: _highlightText(
+                              [
+                                if (username.isNotEmpty) '@$username',
+                                if (email.isNotEmpty) email,
+                              ].join(' • '),
+                              _query,
+                              baseDetailStyle,
+                              highlightDetailStyle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
         ),
       ),
     );
