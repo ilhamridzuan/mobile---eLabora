@@ -1,3 +1,3 @@
 class ApiConfig {
-  static const String baseUrl = 'https://elabora-api-production.up.railway.app';
+  static const String baseUrl = 'https://elabora-api.azurewebsites.net';
 }

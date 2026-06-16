@@ -56,10 +56,7 @@ class _AkunPageState extends State<AkunPage> {
         elevation: 0,
         backgroundColor: color.surface,
         foregroundColor: color.onSurface,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-        ),
+        automaticallyImplyLeading: false,
       ),
 
       body: FutureBuilder<Map<String, dynamic>>(
@@ -330,22 +327,41 @@ class _AkunPageState extends State<AkunPage> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        selectedItemColor: color.primary,
-        unselectedItemColor: color.onSurface.withValues(alpha: 0.6),
-        backgroundColor: color.surface,
-        showUnselectedLabels: true,
-        onTap: (value) {
-          Navigator.pushReplacementNamed(
-            context,
-            ['/home', '/antrian', '/akun'][value],
-          );
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: 3,
+        backgroundColor: Colors.white,
+        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        onDestinationSelected: (value) {
+          if (value == 3) return;
+          if (value == 0) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else if (value == 1) {
+            Navigator.pushReplacementNamed(context, '/cek_hasil');
+          } else if (value == 2) {
+            Navigator.pushReplacementNamed(context, '/riwayat');
+          }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt_rounded), label: 'Antrian'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Akun'),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.biotech_outlined, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.biotech_rounded, color: AppColors.primary),
+            label: 'Hasil',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.history_outlined, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.history_rounded, color: AppColors.primary),
+            label: 'Riwayat',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded, color: AppColors.textSecondary),
+            selectedIcon: Icon(Icons.person_rounded, color: AppColors.primary),
+            label: 'Profile',
+          ),
         ],
       ),
     );
