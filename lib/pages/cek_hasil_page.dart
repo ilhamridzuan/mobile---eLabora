@@ -62,11 +62,14 @@ class _CekHasilPageState extends State<CekHasilPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
         title: const Text('Hasil Pemeriksaan'),
+        automaticallyImplyLeading: widget.pasienId != null,
+        leading: widget.pasienId != null
+            ? IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              )
+            : null,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -169,6 +172,45 @@ class _CekHasilPageState extends State<CekHasilPage> {
           },
         ),
       ),
+      bottomNavigationBar: widget.pasienId == null
+          ? NavigationBar(
+              selectedIndex: 1,
+              backgroundColor: Colors.white,
+              indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+              onDestinationSelected: (value) {
+                if (value == 1) return;
+                if (value == 0) {
+                  Navigator.pushReplacementNamed(context, '/home');
+                } else if (value == 2) {
+                  Navigator.pushReplacementNamed(context, '/riwayat');
+                } else if (value == 3) {
+                  Navigator.pushReplacementNamed(context, '/akun');
+                }
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined, color: AppColors.textSecondary),
+                  selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
+                  label: 'Home',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.biotech_outlined, color: AppColors.textSecondary),
+                  selectedIcon: Icon(Icons.biotech_rounded, color: AppColors.primary),
+                  label: 'Hasil',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.history_outlined, color: AppColors.textSecondary),
+                  selectedIcon: Icon(Icons.history_rounded, color: AppColors.primary),
+                  label: 'Riwayat',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline_rounded, color: AppColors.textSecondary),
+                  selectedIcon: Icon(Icons.person_rounded, color: AppColors.primary),
+                  label: 'Profile',
+                ),
+              ],
+            )
+          : null,
     );
   }
 

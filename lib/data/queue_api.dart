@@ -7,8 +7,9 @@ class QueueApi {
   /// GET /queue/today
   /// Response:
   /// { tanggal: "YYYY-MM-DD", data: [ {...}, ... ] }
-  Future<Map<String, dynamic>> today() async {
-    final res = await _client.dio.get('/queue/today');
+  Future<Map<String, dynamic>> today({String? date}) async {
+    final path = date != null ? '/queue/today?date=$date' : '/queue/today';
+    final res = await _client.dio.get(path);
     final map = (res.data is Map)
         ? Map<String, dynamic>.from(res.data)
         : <String, dynamic>{};
@@ -27,8 +28,9 @@ class QueueApi {
   /// GET /queue/stats
   /// Response:
   /// { stats: {...}, tanggal: "YYYY-MM-DD" }
-  Future<Map<String, dynamic>> stats() async {
-    final res = await _client.dio.get('/queue/stats');
+  Future<Map<String, dynamic>> stats({String? date}) async {
+    final path = date != null ? '/queue/stats?date=$date' : '/queue/stats';
+    final res = await _client.dio.get(path);
     final map = (res.data is Map)
         ? Map<String, dynamic>.from(res.data)
         : <String, dynamic>{};

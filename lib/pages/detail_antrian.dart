@@ -68,13 +68,33 @@ class _DetailAntrianPageState extends State<DetailAntrianPage> {
     return _pad3(waiting.first['no_antrian']);
   }
 
+  String _yyyyMmDd(DateTime d) {
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final dd = d.day.toString().padLeft(2, '0');
+    return '$y-$m-$dd';
+  }
+
   Future<Map<String, dynamic>> _loadFromApi(Map<String, dynamic>? argMy) async {
     final me = await _authApi.me();
     final profil = me['profil'] as Map<String, dynamic>?;
     final pasienId = (profil?['id'] as int?);
 
-    final today = await _queueApi.today();
-    final statsWrap = await _queueApi.stats();
+    String? targetDate;
+    if (argMy != null && argMy['tanggal_antrian'] != null) {
+      try {
+        final rawDate = argMy['tanggal_antrian'].toString();
+        if (rawDate.contains('T')) {
+          targetDate = rawDate.split('T')[0];
+        } else {
+          targetDate = rawDate;
+        }
+      } catch (_) {}
+    }
+    targetDate ??= _yyyyMmDd(DateTime.now());
+
+    final today = await _queueApi.today(date: targetDate);
+    final statsWrap = await _queueApi.stats(date: targetDate);
 
     final items = (today['data'] is List)
         ? (today['data'] as List).whereType<Map<String, dynamic>>().toList()
@@ -83,7 +103,7 @@ class _DetailAntrianPageState extends State<DetailAntrianPage> {
     Map<String, dynamic>? my = argMy;
     if (my == null && pasienId != null) {
       try {
-        my = items.firstWhere((e) => e['pasien_id'] == pasienId);
+        my = items.firstWhere((e) => _toInt(e['pasien_id']) == pasienId);
       } catch (_) {
         my = null;
       }
@@ -103,7 +123,7 @@ class _DetailAntrianPageState extends State<DetailAntrianPage> {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments;
-    final argMy = (args is Map) ? Map<String, dynamic>.from(args as Map) : null;
+    final argMy = (args is Map) ? Map<String, dynamic>.from(args) : null;
 
     _future = _loadFromApi(argMy);
 
