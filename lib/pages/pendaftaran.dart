@@ -112,11 +112,12 @@ class _PendaftaranPageState extends State<PendaftaranPage> {
   }
 
   String _jadwalPemeriksaanAt(DateTime date, TimeOfDay time) {
-    // format backend: "2025-12-25 10:00:00+07:00" (Local Jakarta)
+    // format backend: "2025-12-25 10:00:00" (Local Jakarta, tanpa offset)
+    // API otomatis menormalkan ke WIB — jangan kirim +07:00 agar tidak double-convert
     final ymd = _yyyyMmDd(date);
     final hh = time.hour.toString().padLeft(2, '0');
     final mm = time.minute.toString().padLeft(2, '0');
-    return '$ymd $hh:$mm:00+07:00';
+    return '$ymd $hh:$mm:00';
   }
 
   String _displayDate(DateTime d) {
