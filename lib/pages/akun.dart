@@ -82,240 +82,223 @@ class _AkunPageState extends State<AkunPage> {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Profile
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: color.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.textSecondary.withValues(alpha: 0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 26,
-                        backgroundColor: color.primary.withValues(alpha: 0.08),
-                        child: Icon(
-                          Icons.person_outline_rounded,
-                          size: 34,
-                          color: color.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              nama,
-                              style: text.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: color.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              roleLabel,
-                              style: text.bodyMedium?.copyWith(
-                                color: color.onSurface,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.notifications_none_rounded,
-                        color: color.primary,
-                        size: 26,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                Text(
-                  'Account',
-                  style: text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Profile
-                Row(
-                  children: [
-                    Icon(Icons.person_outline, color: color.onSurfaceVariant),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        'Profile',
-                        style: text.bodyLarge?.copyWith(
-                          color: color.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-                Divider(
-                  color: color.outline.withValues(alpha: 0.4),
-                  thickness: 0.4,
-                ),
-
-                // Password
-                Row(
-                  children: [
-                    Icon(Icons.lock_outline, color: color.onSurfaceVariant),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        'Password',
-                        style: text.bodyLarge?.copyWith(
-                          color: color.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-                Divider(
-                  color: color.outline.withValues(alpha: 0.4),
-                  thickness: 0.4,
-                ),
-
-                // Notifications
-                Row(
-                  children: [
-                    Icon(Icons.notifications_none_rounded, color: color.onSurfaceVariant),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        'Notifications',
-                        style: text.bodyLarge?.copyWith(
-                          color: color.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 28),
-
-                // More Section
-                Text(
-                  'More',
-                  style: text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Rate & Review
-                Row(
-                  children: [
-                    Icon(Icons.star_outline_rounded, color: color.onSurfaceVariant),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        'Rate & Review',
-                        style: text.bodyLarge?.copyWith(
-                          color: color.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-                Divider(
-                  color: color.outline.withValues(alpha: 0.4),
-                  thickness: 0.4,
-                ),
-
-                // Help
-                Row(
-                  children: [
-                    Icon(Icons.help_outline_rounded, color: color.onSurfaceVariant),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        'Help',
-                        style: text.bodyLarge?.copyWith(
-                          color: color.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 40),
-
-                // Logout (dibuat clickable)
+                // Centered Profile Header (Google M3 Style)
                 Center(
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: _logout,
-                    child: Card(
-                      color: color.errorContainer.withValues(alpha: 0.15),
-                      elevation: 0.8,
-                      shadowColor: AppColors.textSecondary.withValues(alpha: 0.08),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            width: 2,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 44,
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.08),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            size: 48,
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 100),
+                      const SizedBox(height: 16),
+                      Text(
+                        nama,
+                        textAlign: TextAlign.center,
+                        style: text.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                          fontSize: 22,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.logout_rounded, color: color.error),
-                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.verified_user_outlined,
+                              color: AppColors.primary,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 6),
                             Text(
-                              'Log out',
-                              style: text.bodyLarge?.copyWith(
-                                color: color.error,
-                                fontWeight: FontWeight.w600,
+                              roleLabel,
+                              style: text.bodySmall?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
                               ),
                             ),
                           ],
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Account Settings Group
+                Text(
+                  'Pengaturan Akun',
+                  style: text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.06),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.textPrimary.withValues(alpha: 0.015),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.person_outline_rounded,
+                        label: 'Profile',
+                        iconColor: AppColors.primary,
+                        onTap: () {
+                          // Aksi ke menu Profile
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.primary.withValues(alpha: 0.06),
+                        indent: 56,
+                      ),
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.lock_outline_rounded,
+                        label: 'Password',
+                        iconColor: AppColors.secondary,
+                        onTap: () {
+                          // Aksi ke menu Password
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.primary.withValues(alpha: 0.06),
+                        indent: 56,
+                      ),
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.notifications_none_rounded,
+                        label: 'Notifications',
+                        iconColor: Colors.orange,
+                        onTap: () {
+                          // Aksi ke menu Notifications
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // More Settings Group
+                Text(
+                  'Lainnya',
+                  style: text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.06),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.textPrimary.withValues(alpha: 0.015),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.star_outline_rounded,
+                        label: 'Rate & Review',
+                        iconColor: Colors.amber.shade700,
+                        onTap: () {
+                          // Aksi ke menu Rate
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.primary.withValues(alpha: 0.06),
+                        indent: 56,
+                      ),
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.help_outline_rounded,
+                        label: 'Help',
+                        iconColor: Colors.purple,
+                        onTap: () {
+                          // Aksi ke menu Help
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // Logout Pill Button
+                Center(
+                  child: TextButton.icon(
+                    onPressed: _logout,
+                    icon: const Icon(Icons.logout_rounded, color: Colors.red, size: 18),
+                    label: const Text(
+                      'Log out',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.red.withValues(alpha: 0.08),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
                   ),
@@ -363,6 +346,51 @@ class _AkunPageState extends State<AkunPage> {
             label: 'Profile',
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    final t = Theme.of(context).textTheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: t.bodyLarge?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
